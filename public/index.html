@@ -7,7 +7,7 @@ $(document).ready(function(){
     var socket = io.connect('http://localhost:3000');
 
     // DEBUGGGINGNGNGNGNGNGNNG
-    $('input[name="funds"]').val((Math.floor(Math.random() * 1000) + 1) )
+    //$('input[name="funds"]').val((Math.floor(Math.random() * 1000) + 1) )
 
     // Initial set of notes, loop through and add to list
     socket.on('initial notes', function(data){
@@ -30,7 +30,7 @@ $(document).ready(function(){
     })
 
     socket.on('we got da flights!', function(data){
-        //alert(JSON.stringify(data))
+        alert(JSON.stringify(data))
         $('table.flights').show()
         html = "<tr><th>Departs</th><th>Arrives</th><th>Price</th></tr>"
         for (var i = 0; i < data.length; i++){
@@ -49,10 +49,12 @@ $(document).ready(function(){
     $('#price-form').submit(function(){
         $('.overlay').removeClass('shaded')
         $('.overlay').animate({"width":"25%", "height":"15%"}, 1000);
-        $('#search-bar').animate({'left':'10%', 'top':'10%', 'width':'80%', 'height':'80%'},1000);  
+        $('#search-bar').animate({'left':'10%', 'top':'10%', 'width':'80%', 'height':'80%'},1000); 
+        $('input[name="funds"]').animate({'width':'200px'},500); 
         $('#search-bar').fadeTo("slow", 0.7 );
         var money = Math.round($('input[name="funds"]').val())
-        socket.emit('max price', {amt: money})
+        var location = $('input[name="loc"]').val()
+        socket.emit('max price', {amt: money, loc: location})
     })
 })
 
@@ -619,7 +621,8 @@ src="http://maps.googleapis.com/maps/api/js?key=AIzaSyD8EIVvr2vC4vlKS8KT_jJnwBDB
 <div class="overlay shaded">
     <div id="search-bar">
         <form id="price-form" onsubmit="event.preventDefault();">
-            <input type="text" name="funds" width="100" placeholder="How much money do you have? "></input>
+            <input type="text" name="loc" style="width: 50px;" placeholder="Origin" value="ORD"></input>
+            <input type="text" name="funds" style="width: 300px;" placeholder="How much would you like to spend? "></input>
             <input type="submit">
         </form>
     </div>
