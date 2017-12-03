@@ -1,0 +1,64 @@
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+<link rel="stylesheet" href="/index.css">
+<script>
+$(document).ready(function(){
+    // Connect to our node/websockets server
+    var socket = io.connect('http://localhost:3000');
+
+    // DEBUGGGINGNGNGNGNGNGNNG
+    $('input[name="funds"]').val((Math.floor(Math.random() * 1000) + 1) )
+ 
+    // Initial set of notes, loop through and add to list
+    socket.on('initial notes', function(data){
+        var html = ''
+        for (var i = 0; i < data.length; i++){
+            // We store html as a var then add to DOM after for efficiency
+            html += '<li>' + data[i].note + '</li>'
+        }
+        $('#notes').html(html)
+    })
+ 
+    // New note emitted, add it to our list of current notes
+    socket.on('new note', function(data){
+        $('#notes').append('<li>' + data.note + '</li>')
+    })
+ 
+    // New socket connected, display new count on page
+    socket.on('users connected', function(data){
+        $('#usersConnected').html('Users connected: ' + data)
+    })
+
+    socket.on('we got da flights!', function(data){
+        alert(JSON.stringify(data))
+        $('table.flights').show()
+        html = "<tr><th>Departs</th><th>Arrives</th><th>Price</th></tr>"
+        for (var i = 0; i < data.length; i++){
+            // We store html as a var then add to DOM after for efficiency
+            html += '<tr><td>'+data[i].depart+'</td><td>'+data[i].arrive+'</td><td>'+data[i].price+'</td></tr>'
+        }
+        $('table.flights').html(html) 
+    })
+ 
+    // Add a new (random) note, emit to server to let others know
+    $('#newNote').click(function(){
+        var newNote = 'This is a random ' + (Math.floor(Math.random() * 100) + 1)  + ' note'
+        socket.emit('new note', {note: newNote})
+    })
+    // Query for flights within funding limit
+    $('#updateFlights').click(function(){
+        var money = Math.round($('input[name="funds"]').val())
+        socket.emit('max price', {amt: money})
+    })
+})
+</script>
+<ul id="notes"></ul>
+<div id="usersConnected"></div>
+<div id="newNote">Create a new note</div>
+<form onsubmit="event.preventDefault();">
+    <input type="text" name="funds" width="100" placeholder="How much money do you have? "></input>
+    <button id="updateFlights">Search</button>
+</form>
+<table class="flights" style="display: none;"><tbody>
+<tr><th>Departs</th><th>Arrives</th><th>Price</th></tr>
+<tr><td>ur mum</td><td>on time</td><td>300</td></tr></tbody></table>
