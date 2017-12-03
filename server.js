@@ -71,7 +71,7 @@ io.sockets.on('connection', function(socket){
         max = Math.round(data.amt)
         var flights = []
         // Filter all flights by the maximum price
-        db.query('SELECT * FROM flights WHERE price < (?)', max)
+        db.query('SELECT * FROM socketstest.LowestFares WHERE (DollarFare + DollarTax) < (?) AND Origin = "SEA" Order BY DollarFare ASC', max)
             .on('result', function(flight){
                 // Push results onto the array of flights
                 flights.push(flight)
