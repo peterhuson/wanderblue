@@ -3,59 +3,59 @@
 <link rel="stylesheet" href="/index.css">
 <script>
 $(document).ready(function(){
-    // Connect to our node/websockets server
-    var socket = io.connect('http://localhost:3000');
+  // Connect to our node/websockets server
+  var socket = io.connect('http://localhost:3000');
 
-    // DEBUGGGINGNGNGNGNGNGNNG
-    //$('input[name="funds"]').val((Math.floor(Math.random() * 1000) + 1) )
+  // DEBUGGGINGNGNGNGNGNGNNG
+  //$('input[name="funds"]').val((Math.floor(Math.random() * 1000) + 1) )
 
-    // Initial set of notes, loop through and add to list
-    socket.on('initial notes', function(data){
-        var html = ''
-        for (var i = 0; i < data.length; i++){
-            // We store html as a var then add to DOM after for efficiency
-            html += '<li>' + data[i].note + '</li>'
-        }
-        $('#notes').html(html)
-    })
+  // Initial set of notes, loop through and add to list
+  socket.on('initial notes', function(data){
+    var html = ''
+    for (var i = 0; i < data.length; i++){
+      // We store html as a var then add to DOM after for efficiency
+      html += '<li>' + data[i].note + '</li>'
+    }
+    $('#notes').html(html)
+  })
 
-    // New note emitted, add it to our list of current notes
-    socket.on('new note', function(data){
-        $('#notes').append('<li>' + data.note + '</li>')
-    })
+  // New note emitted, add it to our list of current notes
+  socket.on('new note', function(data){
+    $('#notes').append('<li>' + data.note + '</li>')
+  })
 
-    // New socket connected, display new count on page
-    socket.on('users connected', function(data){
-        $('#usersConnected').html('Users connected: ' + data)
-    })
+  // New socket connected, display new count on page
+  socket.on('users connected', function(data){
+    $('#usersConnected').html('Users connected: ' + data)
+  })
 
-    socket.on('we got da flights!', function(data){
-        alert(JSON.stringify(data))
-        $('table.flights').show()
-        html = "<tr><th>Departs</th><th>Arrives</th><th>Price</th></tr>"
-        for (var i = 0; i < data.length; i++){
-            // We store html as a var then add to DOM after for efficiency
-            html += '<tr><td>'+data[i].depart+'</td><td>'+data[i].arrive+'</td><td>'+data[i].price+'</td></tr>'
-        }
-        //$('table.flights').html(html)
-    })
+  socket.on('we got da flights!', function(data){
+    alert(JSON.stringify(data))
+    $('table.flights').show()
+    html = "<tr><th>Departs</th><th>Arrives</th><th>Price</th></tr>"
+    for (var i = 0; i < data.length; i++){
+      // We store html as a var then add to DOM after for efficiency
+      html += '<tr><td>'+data[i].depart+'</td><td>'+data[i].arrive+'</td><td>'+data[i].price+'</td></tr>'
+    }
+    //$('table.flights').html(html)
+  })
 
-    // Add a new (random) note, emit to server to let others know
-    $('#newNote').click(function(){
-        var newNote = 'This is a random ' + (Math.floor(Math.random() * 100) + 1)  + ' note'
-        socket.emit('new note', {note: newNote})
-    })
-    // Query for flights within funding limit
-    $('#price-form').submit(function(){
-        $('.overlay').removeClass('shaded')
-        $('.overlay').animate({"width":"25%", "height":"15%"}, 1000);
-        $('#search-bar').animate({'left':'10%', 'top':'10%', 'width':'80%', 'height':'80%'},1000);
-        $('input[name="funds"]').animate({'width':'200px'},500);
-        $('#search-bar').fadeTo("slow", 0.7 );
-        var money = Math.round($('input[name="funds"]').val())
-        var location = $('input[name="loc"]').val()
-        socket.emit('max price', {amt: money, loc: location})
-    })
+  // Add a new (random) note, emit to server to let others know
+  $('#newNote').click(function(){
+    var newNote = 'This is a random ' + (Math.floor(Math.random() * 100) + 1)  + ' note'
+    socket.emit('new note', {note: newNote})
+  })
+  // Query for flights within funding limit
+  $('#price-form').submit(function(){
+    $('.overlay').removeClass('shaded')
+    $('.overlay').animate({"width":"25%", "height":"15%"}, 1000);
+    $('#search-bar').animate({'left':'10%', 'top':'10%', 'width':'80%', 'height':'80%'},1000);
+    $('input[name="funds"]').animate({'width':'200px'},500);
+    $('#search-bar').fadeTo("slow", 0.7 );
+    var money = Math.round($('input[name="funds"]').val())
+    var location = $('input[name="loc"]').val()
+    socket.emit('max price', {amt: money, loc: location})
+  })
 })
 
 function initMap() {
@@ -515,34 +515,42 @@ function initMap() {
 
     map.setCenter(new google.maps.LatLng(y, x));
   });
+  function fromLatLngToPoint(latLng, map) {
+  	var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
+  	var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
+  	var scale = Math.pow(2, map.getZoom());
+  	var worldPoint = map.getProjection().fromLatLngToPoint(latLng);
+  	return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
+  }
 
+  function make_flight(lat0, lon0, lat1, lon1, name0, name1) {
+    var info1 = new google.maps.InfoWindow({
+      content: '<B>' + name0 + '</B>'
+    });
+    var info2 = new google.maps.InfoWindow({
+      content: '<B>' + name0 + '</B>'
+    });
 
-  var info1 = new google.maps.InfoWindow({
-    content: '<B>Shits and giggles.</B>'
-  });
-  var info2 = new google.maps.InfoWindow({
-    content: '<B>Giggles and shits.</B>'
-  });
+    var p1_ll = new google.maps.LatLng(lat0, lon0);
+    var p2_ll = new google.maps.LatLng(lat1, lon1);
+    var dist = Math.sqrt(Math.pow(lat1-lat0,2)+Math.pow(lon1-lon0,2));
+    var markerP1 = new google.maps.Marker({
+      position: p1_ll,
+      map: map,
+      name: name0
+    });
+    var markerP2 = new google.maps.Marker({
+      position: p2_ll,
+      map: map,
+      name: name1
+    });
+    //google.maps.event.addListener(map, 'projection_changed', function () {
+      var p1 = map.getProjection().fromLatLngToPoint(markerP1.getPosition());
+      var p2 = map.getProjection().fromLatLngToPoint(markerP2.getPosition());
 
-  var p1 = new google.maps.LatLng(43.634501, -102.552783);
-  var p2 = new google.maps.LatLng(47.987557, -92.929147);
-
-  var markerP1 = new google.maps.Marker({
-    position: p1,
-    map: map
-  });
-  var markerP2 = new google.maps.Marker({
-    position: p2,
-    map: map
-  });
-
-  
-  google.maps.event.addListener(map, 'projection_changed', function () {
-    var p1 = map.getProjection().fromLatLngToPoint(markerP1.getPosition());
-    var p2 = map.getProjection().fromLatLngToPoint(markerP2.getPosition());
     var e = new google.maps.Point(p1.x - p2.x, p1.y - p2.y);
     var m = new google.maps.Point(e.x / 2, e.y / 2);
-    var o = new google.maps.Point(0, 4);
+    var o = new google.maps.Point(0, Math.floor(dist/3));
     var c = new google.maps.Point(m.x + o.x, m.y + o.y);
     var curveMarker2 = new google.maps.Marker({
       position: markerP1.getPosition(),
@@ -573,7 +581,103 @@ function initMap() {
         anchor: new google.maps.Point(0, 0)
       };
       curveMarker2.setIcon(icon);
+    });
+    google.maps.event.addListener(markerP1, 'mouseover', function() {
+        info1.open(map, markerP1);
+      });
+      google.maps.event.addListener(markerP1, 'mouseout', function() {
+          info1.close(map, markerP1);
         });
+        google.maps.event.addListener(markerP2, 'mouseover', function() {
+          var zoom = map.getZoom();
+          var scale = 1 / (Math.pow(2, -zoom));
+          var icon = {
+            path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+            scale: scale,
+            strokeWeight: 3,
+            strokeColor: '#0144FE',
+            fillColor: '#009933',
+            fillOpacity: 0,
+            rotation: 180,
+            anchor: new google.maps.Point(0, 0) };
+            curveMarker2.setIcon(icon);
+            info2.open(map, markerP2);
+          });
+          google.maps.event.addListener(markerP2, 'mouseout', function() {
+            var zoom = map.getZoom();
+            var scale = 1 / (Math.pow(2, -zoom));
+            var icon = {
+              path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+              scale: scale,
+              strokeWeight: 2,
+              strokeColor: '#0E3AB3',
+              fillColor: '#0E3AB3',
+              fillOpacity: 0,
+              rotation: 180,
+              anchor: new google.maps.Point(0, 0) };
+              curveMarker2.setIcon(icon);
+              info2.close(map, markerP2);
+            });
+      //});
+    }
+   /*
+    var info1 = new google.maps.InfoWindow({
+      content: '<B>Shits and giggles.</B>'
+    });
+    var info2 = new google.maps.InfoWindow({
+      content: '<B>Giggles and shits.</B>'
+    });
+
+    var p1 = new google.maps.LatLng(43.634501, -102.552783);
+    var p2 = new google.maps.LatLng(47.987557, -92.929147);
+
+    var markerP1 = new google.maps.Marker({
+      position: p1,
+      map: map
+    });
+    var markerP2 = new google.maps.Marker({
+      position: p2,
+      map: map
+    });*/
+    //var proj;
+    /*google.maps.event.addListener(map, 'projection_changed', function () {
+      proj = map.getProjection();
+      var p1 = proj.fromLatLngToPoint(markerP1.getPosition());
+      var p2 = proj.fromLatLngToPoint(markerP2.getPosition());
+      var e = new google.maps.Point(p1.x - p2.x, p1.y - p2.y);
+      var m = new google.maps.Point(e.x / 2, e.y / 2);
+      var o = new google.maps.Point(0, 4);
+      var c = new google.maps.Point(m.x + o.x, m.y + o.y);
+      var curveMarker2 = new google.maps.Marker({
+        position: markerP1.getPosition(),
+        icon: {
+          path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+          scale: 1 / (Math.pow(2, -3)),
+          strokeWeight: 2,
+          strokeColor: '#0E3AB3',
+          fillColor: '#0E3AB3',
+          fillOpacity: 0,
+          rotation: 180,
+          anchor: new google.maps.Point(0, 0)
+        }
+
+      });
+      curveMarker2.setMap(map);
+      google.maps.event.addListener(map, 'zoom_changed', function () {
+        var zoom = map.getZoom();
+        var scale = 1 / (Math.pow(2, -zoom));
+        var icon = {
+          path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+          scale: scale,
+          strokeWeight: 2,
+          strokeColor: '#0E3AB3',
+          fillColor: '#0E3AB3',
+          fillOpacity: 0,
+          rotation: 180,
+          anchor: new google.maps.Point(0, 0)
+        };
+        curveMarker2.setIcon(icon);
+      });
       google.maps.event.addListener(markerP1, 'mouseover', function() {
         var zoom = map.getZoom();
         var scale = 1 / (Math.pow(2, -zoom));
@@ -588,57 +692,69 @@ function initMap() {
           anchor: new google.maps.Point(0, 0) };
           curveMarker2.setIcon(icon);
           info1.open(map, markerP1);
-    });
-    google.maps.event.addListener(markerP1, 'mouseout', function() {
-      var zoom = map.getZoom();
-      var scale = 1 / (Math.pow(2, -zoom));
-      var icon = {
-        path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
-        scale: scale,
-        strokeWeight: 2,
-        strokeColor: '#0E3AB3',
-        fillColor: '#0E3AB3',
-        fillOpacity: 0,
-        rotation: 180,
-        anchor: new google.maps.Point(0, 0) };
-        curveMarker2.setIcon(icon);
-        info1.close(map, markerP1);
-    });
-  });
-}
+        });
+        google.maps.event.addListener(markerP1, 'mouseout', function() {
+          var zoom = map.getZoom();
+          var scale = 1 / (Math.pow(2, -zoom));
+          var icon = {
+            path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+            scale: scale,
+            strokeWeight: 2,
+            strokeColor: '#0E3AB3',
+            fillColor: '#0E3AB3',
+            fillOpacity: 0,
+            rotation: 180,
+            anchor: new google.maps.Point(0, 0) };
+            curveMarker2.setIcon(icon);
+            info1.close(map, markerP1);
+          });
+        });*/
+        google.maps.event.addListener(map, 'projection_changed', function () {
+          make_flight(40, -100, 50, -90, 'a', 'b');
+          make_flight(40, -100, 60, -70, 'c', 'd');
+          make_flight(40, -100, 35, -80, 'e', 'f');
+          make_flight(40, -100, 70, -105, 'g', 'h');
+          make_flight(40, -100, 20, -95, 'i', 'j');
+          make_flight(40, -100, 30, -115, 'k', 'l');
+          make_flight(40, -100, 40, -120, 'a', 'b');
+          make_flight(40, -100, 45, -110, 'c', 'd');
+          make_flight(40, -100, 55, -125, 'e', 'f');
+          make_flight(40, -100, 55, -65, 'g', 'h');
+        });
+      }
 
-jQuery.loadScript = function (url, callback) {
-  jQuery.ajax({
-    url: url,
-    dataType: 'script',
-    success: callback,
-    async: true
-  });
-}
-setTimeout(function(){
-  $.loadScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyAuERUq-c_f79EH9py6m9MC8PtA5Tesa8w&callback=initMap')
-},1000);
-
-</script>
-<!--<script async defer
-src="http://maps.googleapis.com/maps/api/js?key=AIzaSyD8EIVvr2vC4vlKS8KT_jJnwBDBsFKIfeQ&callback=initMap">
-</script>-->
-<!--<script async defer src="/mapsgoogleapis.js"></script>-->
-<!--<ul id="notes"></ul>-->
-<div style="height:100%; width:100%;">
-  <div id="map">this is a map</div>
-</div>
-<div id="usersConnected"></div>
-<div id="newNote">Search for shit</div>
-<div class="overlay shaded">
+      jQuery.loadScript = function (url, callback) {
+        jQuery.ajax({
+          url: url,
+          dataType: 'script',
+          success: callback,
+          async: true
+        });
+      }
+      setTimeout(function(){
+        $.loadScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyAuERUq-c_f79EH9py6m9MC8PtA5Tesa8w&callback=initMap')
+      },1000);
+      //google.maps.event.addDomListener(window, "load", initialize);
+    </script>
+    <!--<script async defer
+    src="http://maps.googleapis.com/maps/api/js?key=AIzaSyD8EIVvr2vC4vlKS8KT_jJnwBDBsFKIfeQ&callback=initMap">
+  </script>-->
+  <!--<script async defer src="/mapsgoogleapis.js"></script>-->
+  <!--<ul id="notes"></ul>-->
+  <div style="height:100%; width:100%;">
+    <div id="map">this is a map</div>
+  </div>
+  <div id="usersConnected"></div>
+  <div id="newNote">Search for shit</div>
+  <div class="overlay shaded">
     <div id="search-bar">
-        <form id="price-form" onsubmit="event.preventDefault();">
-            <input type="text" name="loc" style="width: 50px;" placeholder="Origin" value="ORD"></input>
-            <input type="text" name="funds" style="width: 300px;" placeholder="How much would you like to spend? "></input>
-            <input type="submit">
-        </form>
+      <form id="price-form" onsubmit="event.preventDefault();">
+        <input type="text" name="loc" style="width: 50px;" placeholder="Origin" value="ORD"></input>
+        <input type="text" name="funds" style="width: 300px;" placeholder="How much would you like to spend? "></input>
+        <input type="submit">
+      </form>
     </div>
-</div>
-<table class="flights" style="display: none;"><tbody>
-  <tr><th>Departs</th><th>Arrives</th><th>Price</th></tr>
-  <tr><td>ur mum</td><td>on time</td><td>300</td></tr></tbody></table>
+  </div>
+  <table class="flights" style="display: none;"><tbody>
+    <tr><th>Departs</th><th>Arrives</th><th>Price</th></tr>
+    <tr><td>ur mum</td><td>on time</td><td>300</td></tr></tbody></table>
