@@ -1,4 +1,4 @@
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/jquery.min.js"></script>
 <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 <link rel="stylesheet" href="/index.css">
 <script>
@@ -51,14 +51,30 @@ $(document).ready(function(){
         socket.emit('max price', {amt: money})
     })
 })
+function initMap() {
+        var uluru = {lat: -25.363, lng: 131.044};
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 4,
+          center: uluru
+        });
+        var marker = new google.maps.Marker({
+          position: uluru,
+          map: map
+        });
+      }
 </script>
+<--<script async defer
+    src="http://maps.googleapis.com/maps/api/js?key=AIzaSyD8EIVvr2vC4vlKS8KT_jJnwBDBsFKIfeQ&callback=initMap">
+    </script>-->
+<!--<script async defer src="/mapsgoogleapis.js"></script>-->
 <ul id="notes"></ul>
 <div id="usersConnected"></div>
-<div id="newNote">Create a new note</div>
+<div id="newNote">Search for shit</div>
 <form onsubmit="event.preventDefault();">
     <input type="text" name="funds" width="100" placeholder="How much money do you have? "></input>
     <button id="updateFlights">Search</button>
 </form>
+<div id="map"></div>
 <table class="flights" style="display: none;"><tbody>
 <tr><th>Departs</th><th>Arrives</th><th>Price</th></tr>
 <tr><td>ur mum</td><td>on time</td><td>300</td></tr></tbody></table>
