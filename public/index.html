@@ -49,7 +49,7 @@ $(document).ready(function(){
     $('#price-form').submit(function(){
         $('.overlay').removeClass('shaded')
         $('.overlay').animate({"width":"25%", "height":"15%"}, 1000);
-        $('#search-bar').animate({'left':'10%', 'top':'10%', 'width':'80%', 'height':'80%'},1000);  
+        $('#search-bar').animate({'left':'10%', 'top':'10%', 'width':'80%', 'height':'80%'},1000);
         $('#search-bar').fadeTo("slow", 0.7 );
         var money = Math.round($('input[name="funds"]').val())
         socket.emit('max price', {amt: money})
@@ -514,6 +514,14 @@ function initMap() {
     map.setCenter(new google.maps.LatLng(y, x));
   });
 
+
+  var info1 = new google.maps.InfoWindow({
+    content: '<B>Shits and giggles.</B>'
+  });
+  var info2 = new google.maps.InfoWindow({
+    content: '<B>Giggles and shits.</B>'
+  });
+
   var p1 = new google.maps.LatLng(43.634501, -102.552783);
   var p2 = new google.maps.LatLng(47.987557, -92.929147);
 
@@ -525,6 +533,8 @@ function initMap() {
     position: p2,
     map: map
   });
+
+  
   google.maps.event.addListener(map, 'projection_changed', function () {
     var p1 = map.getProjection().fromLatLngToPoint(markerP1.getPosition());
     var p2 = map.getProjection().fromLatLngToPoint(markerP2.getPosition());
@@ -575,6 +585,7 @@ function initMap() {
           rotation: 180,
           anchor: new google.maps.Point(0, 0) };
           curveMarker2.setIcon(icon);
+          info1.open(map, markerP1);
     });
     google.maps.event.addListener(markerP1, 'mouseout', function() {
       var zoom = map.getZoom();
@@ -589,6 +600,7 @@ function initMap() {
         rotation: 180,
         anchor: new google.maps.Point(0, 0) };
         curveMarker2.setIcon(icon);
+        info1.close(map, markerP1);
     });
   });
 }
