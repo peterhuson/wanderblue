@@ -481,10 +481,7 @@ function initMap() {
     gestureHandling: 'greedy'
 
   });
-  var marker = new google.maps.Marker({
-    position: uluru,
-    map: map
-  });
+
   var opt = { minZoom: 3, maxZoom: 6 };
   map.setOptions(opt);
   var strictBounds = new google.maps.LatLngBounds(
