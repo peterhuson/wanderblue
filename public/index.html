@@ -8,7 +8,7 @@ $(document).ready(function(){
 
     // DEBUGGGINGNGNGNGNGNGNNG
     $('input[name="funds"]').val((Math.floor(Math.random() * 1000) + 1) )
- 
+
     // Initial set of notes, loop through and add to list
     socket.on('initial notes', function(data){
         var html = ''
@@ -18,12 +18,12 @@ $(document).ready(function(){
         }
         $('#notes').html(html)
     })
- 
+
     // New note emitted, add it to our list of current notes
     socket.on('new note', function(data){
         $('#notes').append('<li>' + data.note + '</li>')
     })
- 
+
     // New socket connected, display new count on page
     socket.on('users connected', function(data){
         $('#usersConnected').html('Users connected: ' + data)
@@ -37,9 +37,9 @@ $(document).ready(function(){
             // We store html as a var then add to DOM after for efficiency
             html += '<tr><td>'+data[i].depart+'</td><td>'+data[i].arrive+'</td><td>'+data[i].price+'</td></tr>'
         }
-        $('table.flights').html(html) 
+        $('table.flights').html(html)
     })
- 
+
     // Add a new (random) note, emit to server to let others know
     $('#newNote').click(function(){
         var newNote = 'This is a random ' + (Math.floor(Math.random() * 100) + 1)  + ' note'
@@ -55,7 +55,7 @@ function initMap() {
         var uluru = {lat: 31.9686, lng: -99.9018};
         var map = new google.maps.Map(document.getElementById('map'), {
           zoom: 3,
-          center: uluru, 
+          center: uluru,
           styles: [
         {
             "featureType": "administrative",
@@ -485,6 +485,8 @@ function initMap() {
           position: uluru,
           map: map
         });
+        var opt = { minZoom: 3, maxZoom: 6 };
+        map.setOptions(opt);
       }
       jQuery.loadScript = function (url, callback) {
             jQuery.ajax({
