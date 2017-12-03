@@ -1,8 +1,13 @@
 <script src="/jquery.min.js"></script>
 <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 <link rel="stylesheet" href="/index.css">
+
+<div id="overlay">
+  <h1 id="h1">Overlay Text</h1>
+</div>
 <script>
 $(document).ready(function(){
+  document.getElementById("overlay").style.display = "flex";
   // Connect to our node/websockets server
   var socket = io.connect('http://localhost:3000');
 
@@ -515,13 +520,6 @@ function initMap() {
 
     map.setCenter(new google.maps.LatLng(y, x));
   });
-  function fromLatLngToPoint(latLng, map) {
-  	var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
-  	var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
-  	var scale = Math.pow(2, map.getZoom());
-  	var worldPoint = map.getProjection().fromLatLngToPoint(latLng);
-  	return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
-  }
 
   function make_flight(lat0, lon0, lat1, lon1, name0, name1) {
     var info1 = new google.maps.InfoWindow({

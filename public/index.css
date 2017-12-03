@@ -13,18 +13,31 @@ html, body, #map-canvas {
     height: 100%;
     width: 100%;
 }
+#overlay {
+    position: fixed;
+    display: none;
+    width: 50%;
+    height: 50%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    cursor: pointer;
+}
 
-.tooltip{
-border:thin 1px #eee;
-background-color:#FFFBF0;
-padding:5px;
-width:200px;
+h1 {
+	font-family: 'Lobster';
+	font-size: 24px;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: 500;
+	line-height: 26.4px;
 }
 #price-form {
 	height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 3;
 }
 input {
     text-align: left;
@@ -43,6 +56,7 @@ input {
     width: 40%;
     height: 10%;
     position: relative;
+    z-index: 2;
 }
 .overlay {
 	width: 100%;
