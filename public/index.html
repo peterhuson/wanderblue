@@ -31,12 +31,20 @@ $(document).ready(function(){
 
   socket.on('we got da flights!', function(data){
     alert(JSON.stringify(data))
-    $('table.flights').show()
+    //$('table.flights').show()
     html = "<tr><th>Departs</th><th>Arrives</th><th>Price</th></tr>"
-    for (var i = 0; i < data.length; i++){
-      // We store html as a var then add to DOM after for efficiency
-      html += '<tr><td>'+data[i].depart+'</td><td>'+data[i].arrive+'</td><td>'+data[i].price+'</td></tr>'
-    }
+    origin = data[Object.keys(data)[0]]
+    console.log(data)
+    console.log(origin)
+    //google.maps.event.addListener(map, 'projection_changed', function () {
+            for (var i = 1; i < Object.keys(data).length; i++){
+              // We store html as a var then add to DOM after for efficiency
+              //html += '<tr><td>'+data[i].depart+'</td><td>'+data[i].arrive+'</td><td>'+data[i].price+'</td></tr>'
+              current = data[Object.keys(data)[i]]
+              console.log("making flight from: "+origin.lat+origin.lon+"to"+current.lat+current.lon)
+              make_flight(origin.lat, origin.lon, current.lat, current.lon, 'a', 'b');
+            }
+       // });
     //$('table.flights').html(html)
   })
 
@@ -57,10 +65,10 @@ $(document).ready(function(){
     socket.emit('max price', {amt: money, loc: location})
   })
 })
-
+var map;
 function initMap() {
   var uluru = {lat: 31.9686, lng: -99.9018};
-  var map = new google.maps.Map(document.getElementById('map'), {
+  map = new google.maps.Map(document.getElementById('map'), {
     zoom: 3,
     center: {lat: 50, lng: -101},
     styles: [
@@ -619,7 +627,7 @@ function initMap() {
               info2.close(map, markerP2);
             });
       //});
-    }
+    };
    /*
     var info1 = new google.maps.InfoWindow({
       content: '<B>Shits and giggles.</B>'
@@ -710,7 +718,7 @@ function initMap() {
           });
         });*/
         google.maps.event.addListener(map, 'projection_changed', function () {
-          make_flight(40, -100, 50, -90, 'a', 'b');
+          /*make_flight(40, -100, 50, -90, 'a', 'b');
           make_flight(40, -100, 60, -70, 'c', 'd');
           make_flight(40, -100, 35, -80, 'e', 'f');
           make_flight(40, -100, 70, -105, 'g', 'h');
@@ -718,10 +726,107 @@ function initMap() {
           make_flight(40, -100, 30, -115, 'k', 'l');
           make_flight(40, -100, 40, -120, 'a', 'b');
           make_flight(40, -100, 45, -110, 'c', 'd');
-          make_flight(40, -100, 55, -125, 'e', 'f');
-          make_flight(40, -100, 55, -65, 'g', 'h');
+          make_flight(40, -100, 55, -125, 'e', 'f');*/
+          //make_flight(40, -100, 55, -65, 'g', 'h');
         });
       }
+
+
+    /*function make_flight_new(lat0, lon0, lat1, lon1, name0, name1) {
+    var info1 = new google.maps.InfoWindow({
+      content: '<B>' + name0 + '</B>'
+    });
+    var info2 = new google.maps.InfoWindow({
+      content: '<B>' + name0 + '</B>'
+    });
+
+    var p1_ll = new google.maps.LatLng(lat0, lon0);
+    var p2_ll = new google.maps.LatLng(lat1, lon1);
+    var dist = Math.sqrt(Math.pow(lat1-lat0,2)+Math.pow(lon1-lon0,2));
+    var markerP1 = new google.maps.Marker({
+      position: p1_ll,
+      map: map,
+      name: name0
+    });
+    var markerP2 = new google.maps.Marker({
+      position: p2_ll,
+      map: map,
+      name: name1
+    });
+    //google.maps.event.addListener(map, 'projection_changed', function () {
+      var p1 = map.getProjection().fromLatLngToPoint(markerP1.getPosition());
+      var p2 = map.getProjection().fromLatLngToPoint(markerP2.getPosition());
+
+    var e = new google.maps.Point(p1.x - p2.x, p1.y - p2.y);
+    var m = new google.maps.Point(e.x / 2, e.y / 2);
+    var o = new google.maps.Point(0, Math.floor(dist/3));
+    var c = new google.maps.Point(m.x + o.x, m.y + o.y);
+    var curveMarker2 = new google.maps.Marker({
+      position: markerP1.getPosition(),
+      icon: {
+        path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+        scale: 1 / (Math.pow(2, -3)),
+        strokeWeight: 2,
+        strokeColor: '#0E3AB3',
+        fillColor: '#0E3AB3',
+        fillOpacity: 0,
+        rotation: 180,
+        anchor: new google.maps.Point(0, 0)
+      }
+
+    });
+    curveMarker2.setMap(map);
+    google.maps.event.addListener(map, 'zoom_changed', function () {
+      var zoom = map.getZoom();
+      var scale = 1 / (Math.pow(2, -zoom));
+      var icon = {
+        path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+        scale: scale,
+        strokeWeight: 2,
+        strokeColor: '#0E3AB3',
+        fillColor: '#0E3AB3',
+        fillOpacity: 0,
+        rotation: 180,
+        anchor: new google.maps.Point(0, 0)
+      };
+      curveMarker2.setIcon(icon);
+    });
+    google.maps.event.addListener(markerP1, 'mouseover', function() {
+        info1.open(map, markerP1);
+      });
+      google.maps.event.addListener(markerP1, 'mouseout', function() {
+          info1.close(map, markerP1);
+        });
+        google.maps.event.addListener(markerP2, 'mouseover', function() {
+          var zoom = map.getZoom();
+          var scale = 1 / (Math.pow(2, -zoom));
+          var icon = {
+            path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+            scale: scale,
+            strokeWeight: 3,
+            strokeColor: '#0144FE',
+            fillColor: '#009933',
+            fillOpacity: 0,
+            rotation: 180,
+            anchor: new google.maps.Point(0, 0) };
+            curveMarker2.setIcon(icon);
+            info2.open(map, markerP2);
+          });
+          google.maps.event.addListener(markerP2, 'mouseout', function() {
+            var zoom = map.getZoom();
+            var scale = 1 / (Math.pow(2, -zoom));
+            var icon = {
+              path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+              scale: scale,
+              strokeWeight: 2,
+              strokeColor: '#0E3AB3',
+              fillColor: '#0E3AB3',
+              fillOpacity: 0,
+              rotation: 180,
+              anchor: new google.maps.Point(0, 0) };
+              curveMarker2.setIcon(icon);
+              info2.close(map, markerP2);
+            });*/
 
       jQuery.loadScript = function (url, callback) {
         jQuery.ajax({
@@ -732,8 +837,105 @@ function initMap() {
         });
       }
       setTimeout(function(){
-        $.loadScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyAuERUq-c_f79EH9py6m9MC8PtA5Tesa8w&callback=initMap')
-      },1000);
+        $.loadScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyAuERUq-c_f79EH9py6m9MC8PtA5Tesa8w&callback=initMap')},1000);
+
+      function make_flight(lat0, lon0, lat1, lon1, name0, name1) {
+    var info1 = new google.maps.InfoWindow({
+      content: '<B>' + name0 + '</B>'
+    });
+    var info2 = new google.maps.InfoWindow({
+      content: '<B>' + name0 + '</B>'
+    });
+
+    var p1_ll = new google.maps.LatLng(lat0, lon0);
+    var p2_ll = new google.maps.LatLng(lat1, lon1);
+    var dist = Math.sqrt(Math.pow(lat1-lat0,2)+Math.pow(lon1-lon0,2));
+    var markerP1 = new google.maps.Marker({
+      position: p1_ll,
+      map: map,
+      name: name0
+    });
+    var markerP2 = new google.maps.Marker({
+      position: p2_ll,
+      map: map,
+      name: name1
+    });
+    //google.maps.event.addListener(map, 'projection_changed', function () {
+      var p1 = map.getProjection().fromLatLngToPoint(markerP1.getPosition());
+      var p2 = map.getProjection().fromLatLngToPoint(markerP2.getPosition());
+
+    var e = new google.maps.Point(p1.x - p2.x, p1.y - p2.y);
+    var m = new google.maps.Point(e.x / 2, e.y / 2);
+    var o = new google.maps.Point(0, Math.floor(dist/3));
+    var c = new google.maps.Point(m.x + o.x, m.y + o.y);
+    var curveMarker2 = new google.maps.Marker({
+      position: markerP1.getPosition(),
+      icon: {
+        path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+        scale: 1 / (Math.pow(2, -3)),
+        strokeWeight: 2,
+        strokeColor: '#0E3AB3',
+        fillColor: '#0E3AB3',
+        fillOpacity: 0,
+        rotation: 180,
+        anchor: new google.maps.Point(0, 0)
+      }
+
+    });
+    curveMarker2.setMap(map);
+    google.maps.event.addListener(map, 'zoom_changed', function () {
+      var zoom = map.getZoom();
+      var scale = 1 / (Math.pow(2, -zoom));
+      var icon = {
+        path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+        scale: scale,
+        strokeWeight: 2,
+        strokeColor: '#0E3AB3',
+        fillColor: '#0E3AB3',
+        fillOpacity: 0,
+        rotation: 180,
+        anchor: new google.maps.Point(0, 0)
+      };
+      curveMarker2.setIcon(icon);
+    });
+    google.maps.event.addListener(markerP1, 'mouseover', function() {
+        info1.open(map, markerP1);
+      });
+      google.maps.event.addListener(markerP1, 'mouseout', function() {
+          info1.close(map, markerP1);
+        });
+        google.maps.event.addListener(markerP2, 'mouseover', function() {
+          var zoom = map.getZoom();
+          var scale = 1 / (Math.pow(2, -zoom));
+          var icon = {
+            path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+            scale: scale,
+            strokeWeight: 3,
+            strokeColor: '#0144FE',
+            fillColor: '#009933',
+            fillOpacity: 0,
+            rotation: 180,
+            anchor: new google.maps.Point(0, 0) };
+            curveMarker2.setIcon(icon);
+            info2.open(map, markerP2);
+          });
+          google.maps.event.addListener(markerP2, 'mouseout', function() {
+            var zoom = map.getZoom();
+            var scale = 1 / (Math.pow(2, -zoom));
+            var icon = {
+              path: "M 0 0 q " + c.x + " " + c.y + " " + e.x + " " + e.y,
+              scale: scale,
+              strokeWeight: 2,
+              strokeColor: '#0E3AB3',
+              fillColor: '#0E3AB3',
+              fillOpacity: 0,
+              rotation: 180,
+              anchor: new google.maps.Point(0, 0) };
+              curveMarker2.setIcon(icon);
+              info2.close(map, markerP2);
+            });
+      //});
+    };
       //google.maps.event.addDomListener(window, "load", initialize);
     </script>
     <!--<script async defer
