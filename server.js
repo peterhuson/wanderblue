@@ -66,15 +66,44 @@ io.sockets.on('connection', function(socket){
         db.query('INSERT INTO notes (note) VALUES (?)', data.note)
     })
 
+    function contains(a, obj) {
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+    }
+
+    function getlatlong(airport) {
+        db.query('SELECT * FROM socketstest.airports WHERE Code = (?)', airport)
+        .on('result', function(port){
+                // Push results onto the array of flights   
+                console.log(port.lat)
+                toreturn = {lat: port.lat, lon: port.long} 
+                console.log(toreturn)
+                return toreturn
+            })
+    }
+
     socket.on('max price', function(data){
         // New note added, push to all sockets and insert into db
         max = Math.round(data.amt)
         var flights = []
+        var airports = {}
+        airportdata = getlatlong(data.loc)
+        console.log(airportdata)
+        airports[data.loc] = airportdata
+        console.log(airports)
         // Filter all flights by the maximum price
-        db.query('SELECT * FROM socketstest.LowestFares WHERE (DollarFare + DollarTax) < (?) AND Origin = "SEA" Order BY DollarFare ASC', max)
+        db.query('SELECT * FROM socketstest.LowestFares WHERE (DollarFare + DollarTax) < (?) AND Origin = (?) Order BY DollarFare ASC', [max, data.loc])
             .on('result', function(flight){
                 // Push results onto the array of flights
-                flights.push(flight)
+                dest_code = flight.Destination;
+                //console.log(dest_code);
+                if (contains(dest_code, airports)) {
+                    flights.push(flight.push(airports[dest_code]))
+                } 
             })
             .on('end', function(){
                 // Only emit flights after query has been completed

@@ -21,11 +21,18 @@ padding:5px;
 width:200px;
 }
 #price-form {
-	text-align: center;
+	height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 input {
     text-align: left;
-    padding: 5px;
+    padding: 6px;
+    border-radius: 5px;
+    border: 0px;
+    vertical-align: middle;
+    display: inline-block;
 }
 #search-bar {
     top: 40%;
