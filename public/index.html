@@ -2,6 +2,7 @@
 <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 <link rel="stylesheet" href="/index.css">
 <script>
+var marker_arr = [];
 $(document).ready(function(){
   // Connect to our node/websockets server
   var socket = io.connect('http://localhost:3000');
@@ -30,19 +31,23 @@ $(document).ready(function(){
   })
 
   socket.on('we got da flights!', function(data){
-    alert(JSON.stringify(data))
+    //alert(JSON.stringify(data))
     //$('table.flights').show()
     html = "<tr><th>Departs</th><th>Arrives</th><th>Price</th></tr>"
     origin = data[Object.keys(data)[0]]
     console.log(data)
     console.log(origin)
+    $('#pause').hide()
+    //setMap
     //google.maps.event.addListener(map, 'projection_changed', function () {
             for (var i = 1; i < Object.keys(data).length; i++){
               // We store html as a var then add to DOM after for efficiency
               //html += '<tr><td>'+data[i].depart+'</td><td>'+data[i].arrive+'</td><td>'+data[i].price+'</td></tr>'
               current = data[Object.keys(data)[i]]
               console.log("making flight from: "+origin.lat+origin.lon+"to"+current.lat+current.lon)
-              make_flight(origin.lat, origin.lon, current.lat, current.lon, 'a', 'b');
+              origin_html = "Origin:</b>" + Object.keys(data)[0] 
+              dest_html = current.name + ":</b> " + Object.keys(data)[i] + "<br /> Lowest Fare: " + Math.round(current.min_price * 100) / 100 + " on " + current.min_date + "<br />" + current.list.length+ " other flights to this destination"
+              make_flight(origin.lat, origin.lon, current.lat, current.lon, origin_html, dest_html);
             }
        // });
     //$('table.flights').html(html)
@@ -55,6 +60,8 @@ $(document).ready(function(){
   })
   // Query for flights within funding limit
   $('#price-form').submit(function(){
+    $('#pause').show()
+    setMapOnAll(null)
     $('.overlay').removeClass('shaded')
     $('.overlay').animate({"width":"25%", "height":"15%"}, 1000);
     $('#search-bar').animate({'left':'10%', 'top':'10%', 'width':'80%', 'height':'80%'},1000);
@@ -844,7 +851,7 @@ function initMap() {
       content: '<B>' + name0 + '</B>'
     });
     var info2 = new google.maps.InfoWindow({
-      content: '<B>' + name0 + '</B>'
+      content: '<B>' + name1 + '</B>'
     });
 
     var p1_ll = new google.maps.LatLng(lat0, lon0);
@@ -934,8 +941,16 @@ function initMap() {
               curveMarker2.setIcon(icon);
               info2.close(map, markerP2);
             });
+          marker_arr.push(curveMarker2);
+          marker_arr.push(markerP2);
+          marker_arr.push(markerP1);
       //});
     };
+    function setMapOnAll(map){
+        for (var i = 0; i < marker_arr.length; i++){
+            marker_arr[i].setMap(map);
+        }
+    }
       //google.maps.event.addDomListener(window, "load", initialize);
     </script>
     <!--<script async defer
@@ -947,12 +962,14 @@ function initMap() {
     <div id="map">this is a map</div>
   </div>
   <div id="usersConnected"></div>
+  <div id="pause"></div>
+  <div id="logo"><img src="/logo.png" style="width: 300px; "></div>
   <div id="newNote">Search for shit</div>
   <div class="overlay shaded">
     <div id="search-bar">
       <form id="price-form" onsubmit="event.preventDefault();">
-        <input type="text" name="loc" style="width: 50px;" placeholder="Origin" value="ORD"></input>
-        <input type="text" name="funds" style="width: 300px;" placeholder="How much would you like to spend? "></input>
+        <input type="text" autocomplete="off" name="loc" style="width: 50px;" placeholder="Origin" value="ORD"></input>
+        <input type="text" autocomplete="off" name="funds" style="width: 300px;" placeholder="How much would you like to spend? "></input>
         <input type="submit">
       </form>
     </div>
