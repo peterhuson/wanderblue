@@ -108,7 +108,7 @@ io.sockets.on('connection', function(socket){
                         console.log("pushing array")
                         temp[flight.Destination]['list'].push({date: flight.FlightDate, price: flight.DollarFare + flight.DollarTax}) 
                     } else {
-                        temp[flight.Destination] = {name: flight.Name, lat: flight.lat, lon: flight.long, 
+                        temp[flight.Destination] = {name: flight.Name, min_price: flight.DollarFare + flight.DollarTax, min_date: flight.FlightDate, lat: flight.lat, lon: flight.long, 
                             list: [{date: flight.FlightDate, price: flight.DollarFare + flight.DollarTax}]}
                     }
                     
